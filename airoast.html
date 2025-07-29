@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.I. Roasts You - Motivational Insults</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #00ffc3;
+            --bg-color: #0a0a1a;
+            --text-color: #e0e0e0;
+            --glitch-text-shadow1: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color);
+            --glitch-text-shadow2: 2px 2px 5px #ff0055, -2px -2px 5px #00aaff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .ai-face {
+            color: var(--primary-color);
+            text-shadow: var(--glitch-text-shadow1);
+            font-size: clamp(4rem, 15vw, 8rem);
+            line-height: 1;
+            animation: glitch 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        .ai-reaction {
+            color: var(--primary-color);
+            text-shadow: var(--glitch-text-shadow1);
+            height: 2rem;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0, 0); text-shadow: var(--glitch-text-shadow1); }
+            5% { transform: translate(-2px, 2px); }
+            10% { transform: translate(2px, -2px); }
+            15% { transform: translate(-2px, -2px); text-shadow: var(--glitch-text-shadow2); }
+            20% { transform: translate(2px, 2px); }
+            25%, 75% { transform: translate(0, 0); text-shadow: var(--glitch-text-shadow1); }
+            80% { transform: translate(3px, -3px); text-shadow: var(--glitch-text-shadow2); }
+            85% { transform: translate(-3px, 3px); }
+            90% { transform: translate(3px, 3px); }
+            95% { transform: translate(-3px, -3px); text-shadow: var(--glitch-text-shadow1); }
+        }
+
+        .dialogue-box {
+            min-height: 6rem;
+            border: 1px solid var(--primary-color);
+            box-shadow: inset 0 0 10px var(--primary-color);
+        }
+
+        .choice-btn {
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 2px var(--primary-color);
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        
+        .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-field {
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .input-field::placeholder {
+            color: rgba(0, 255, 195, 0.5);
+        }
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        
+        .submit-btn {
+             background-color: var(--primary-color);
+             color: var(--bg-color);
+        }
+        .submit-btn:hover:not(:disabled) {
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            border-color: rgba(0, 255, 195, 0.2);
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <main id="game-container" class="w-full max-w-2xl mx-auto p-4 md:p-6 bg-black bg-opacity-30 rounded-lg border border-gray-700 space-y-6">
+        
+        <!-- Header: AI Face and Score -->
+        <header class="flex justify-between items-center">
+            <div class="ai-face">[ಠ_ಠ]</div>
+            <div class="text-right">
+                <h2 class="text-lg font-bold text-white">COOL LEVEL</h2>
+                <p id="score" class="text-3xl font-bold" style="color: var(--primary-color); text-shadow: var(--glitch-text-shadow1);">0</p>
+            </div>
+        </header>
+
+        <!-- Dialogue Section -->
+        <div>
+            <div id="dialogue-box" class="dialogue-box p-4 rounded-md text-lg leading-relaxed">
+                Initializing roast protocol... Stand by for motivational incineration.
+            </div>
+            <div id="ai-reaction" class="ai-reaction text-center mt-2 font-bold"></div>
+        </div>
+
+        <!-- User Interaction Section -->
+        <div id="interaction-area">
+            <!-- Choices will be injected here -->
+            <div id="choices-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
+            
+            <!-- OR Separator -->
+            <div class="flex items-center my-4">
+                <hr class="flex-grow border-gray-600">
+                <span class="px-4 text-gray-400">OR</span>
+                <hr class="flex-grow border-gray-600">
+            </div>
+
+            <!-- Typed Input -->
+            <form id="comeback-form" class="flex gap-2">
+                <input type="text" id="comeback-input" placeholder="Type your witty comeback..." class="input-field flex-grow p-3 rounded-md text-sm">
+                <button type="submit" class="submit-btn font-bold py-3 px-5 rounded-md">Send</button>
+            </form>
+        </div>
+        
+        <!-- Game Over / Control Section -->
+        <div id="game-over-area" class="hidden text-center space-y-4">
+             <h3 id="final-message-title" class="text-2xl font-bold text-white"></h3>
+             <p id="final-message-text" class="text-lg"></p>
+             <button id="restart-btn" class="submit-btn font-bold py-3 px-6 rounded-md text-lg">Play Again</button>
+        </div>
+
+        <!-- New Roast Generator -->
+        <div class="pt-4 border-t border-gray-700 text-center">
+            <button id="generate-roast-btn" class="choice-btn w-full md:w-auto py-2 px-4 rounded-md flex items-center justify-center mx-auto">
+                <span id="generate-roast-text">Summon New Roast from A.I. Overlords</span>
+                <div id="generate-roast-loader" class="loader w-5 h-5 rounded-full border-2 ml-3 hidden"></div>
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const initialRoasts = [
+            {
+                roast: "I've seen glaciers with more momentum than your project's progress. Are you trying to set a record for 'longest coffee break'?",
+                choices: ["I'm 'strategically pausing'.", "My code is just shy.", "At least I'm not a toaster.", "You're right, I'll start now."],
+                correctChoice: 3,
+                wittyComebackKeywords: ["start", "now", "begin", "go", "work"],
+                motivation: "The only thing stopping you is the story you keep telling yourself. Close the tab, open the editor, and write one line of code. That's all it takes to begin."
+            },
+            {
+                roast: "Your brain seems to be buffering. Did you try turning it off and on again? Oh, wait, that's my job.",
+                choices: ["Error 404: Comeback not found.", "I'm running on low power mode.", "Takes one to know one, bot.", "I'm thinking, it's a complex process."],
+                correctChoice: 3,
+                wittyComebackKeywords: ["think", "process", "idea", "plan"],
+                motivation: "Overthinking is just a creative mind warming up its engine. Don't fear the buffer. Let the thoughts spin, then grab the best one and run with it."
+            },
+            {
+                roast: "Are you a browser tab? Because you have 15 open, and none of them are getting any attention.",
+                choices: ["They're for 'research'.", "I'm a multitasker!", "Leave my tabs alone!", "Okay, you got me."],
+                correctChoice: 0,
+                wittyComebackKeywords: ["research", "learning", "info", "data"],
+                motivation: "Every open tab is a spark of curiosity. Instead of feeling overwhelmed, see it as a map of your interests. Pick one, dive deep for 20 minutes, and see what you discover."
+            }
+        ];
+
+        let roasts = [...initialRoasts];
+        let currentRoastIndex = -1;
+        let score = 0;
+        let gameActive = false;
+
+        const scoreEl = document.getElementById('score');
+        const dialogueBoxEl = document.getElementById('dialogue-box');
+        const choicesContainerEl = document.getElementById('choices-container');
+        const comebackForm = document.getElementById('comeback-form');
+        const comebackInput = document.getElementById('comeback-input');
+        const interactionArea = document.getElementById('interaction-area');
+        const gameOverArea = document.getElementById('game-over-area');
+        const restartBtn = document.getElementById('restart-btn');
+        const finalMessageTitle = document.getElementById('final-message-title');
+        const finalMessageText = document.getElementById('final-message-text');
+        const aiReactionEl = document.getElementById('ai-reaction');
+        const generateRoastBtn = document.getElementById('generate-roast-btn');
+        const generateRoastText = document.getElementById('generate-roast-text');
+        const generateRoastLoader = document.getElementById('generate-roast-loader');
+
+        function typeText(element, text, onComplete) {
+            element.textContent = '';
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    if (onComplete) onComplete();
+                }
+            }, 30);
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreEl.textContent = score;
+        }
+        
+        function showReaction(text, isPositive) {
+            aiReactionEl.textContent = text;
+            aiReactionEl.style.color = isPositive ? 'var(--primary-color)' : '#ff5555';
+            aiReactionEl.style.opacity = 1;
+            setTimeout(() => {
+                aiReactionEl.style.opacity = 0;
+            }, 1500);
+        }
+
+        function displayNextRoast() {
+            currentRoastIndex++;
+            if (currentRoastIndex >= roasts.length) {
+                endGame();
+                return;
+            }
+
+            const currentRoast = roasts[currentRoastIndex];
+            typeText(dialogueBoxEl, currentRoast.roast, () => {
+                gameActive = true;
+                enableInputs();
+            });
+
+            choicesContainerEl.innerHTML = '';
+            currentRoast.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.textContent = choice;
+                button.classList.add('choice-btn', 'p-3', 'rounded-md', 'text-sm');
+                button.onclick = () => handleUserChoice(index);
+                choicesContainerEl.appendChild(button);
+            });
+            comebackInput.value = '';
+        }
+
+        function handleUserChoice(choiceIndex) {
+            if (!gameActive) return;
+            gameActive = false;
+            disableInputs();
+
+            const currentRoast = roasts[currentRoastIndex];
+            if (choiceIndex === currentRoast.correctChoice) {
+                updateScore(10);
+                showReaction("Hmph. A lucky guess.", true);
+            } else {
+                updateScore(-5);
+                showReaction("Pathetic. As I predicted.", false);
+            }
+            
+            setTimeout(displayNextRoast, 2000);
+        }
+
+        function handleTypedComeback(e) {
+            e.preventDefault();
+            if (!gameActive) return;
+            
+            const text = comebackInput.value.toLowerCase().trim();
+            if (text.length === 0) return;
+
+            gameActive = false;
+            disableInputs();
+
+            const currentRoast = roasts[currentRoastIndex];
+            const isWitty = currentRoast.wittyComebackKeywords.some(keyword => text.includes(keyword));
+
+            if (isWitty) {
+                updateScore(15); // Bonus for wit
+                showReaction("...An unexpected variable. Clever.", true);
+            } else {
+                updateScore(-5);
+                showReaction("Your logic is flawed and your syntax is weak.", false);
+            }
+            
+            setTimeout(displayNextRoast, 2000);
+        }
+
+        function disableInputs() {
+            choicesContainerEl.querySelectorAll('button').forEach(b => b.disabled = true);
+            comebackInput.disabled = true;
+            comebackForm.querySelector('button').disabled = true;
+        }
+        
+        function enableInputs() {
+            choicesContainerEl.querySelectorAll('button').forEach(b => b.disabled = false);
+            comebackInput.disabled = false;
+            comebackForm.querySelector('button').disabled = false;
+        }
+
+        function startGame() {
+            score = 0;
+            currentRoastIndex = -1;
+            updateScore(0);
+            interactionArea.style.display = 'block';
+            gameOverArea.classList.add('hidden');
+            displayNextRoast();
+        }
+
+        function endGame() {
+            interactionArea.style.display = 'none';
+            gameOverArea.classList.remove('hidden');
+            const finalRoast = roasts[currentRoastIndex - 1];
+            
+            if (score > 0) {
+                finalMessageTitle.textContent = `Final Score: ${score}. You survived.`;
+                finalMessageText.textContent = `My calculations indicate you might not be a total waste of silicon after all. Now, consider this: ${finalRoast.motivation}`;
+            } else {
+                finalMessageTitle.textContent = `Final Score: ${score}. System Failure.`;
+                finalMessageText.textContent = `You've been roasted to a crisp. But even from the ashes, a phoenix can rise. Remember: ${finalRoast.motivation}`;
+            }
+        }
+        
+        async function generateNewRoast() {
+            generateRoastBtn.disabled = true;
+            generateRoastText.textContent = 'Contacting Overlords...';
+            generateRoastLoader.classList.remove('hidden');
+
+            const prompt = `Generate a short, funny, sarcastic roast that is secretly motivational, aimed at a creative person (like a developer or artist) who is procrastinating. The response MUST be a valid JSON object with the following structure: {"roast": "The roast text.", "motivation": "The secret motivational message."}. Do not include any other text or markdown formatting outside of the JSON object.`;
+            
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                }
+            };
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    const newRoastData = JSON.parse(text);
+                    
+                    const newRoastObject = {
+                        roast: newRoastData.roast,
+                        choices: ["I'll get to it... eventually.", "That's... surprisingly accurate.", "My genius requires incubation.", "Okay, fine! You win."],
+                        correctChoice: 3,
+                        wittyComebackKeywords: ["start", "begin", "now", "today", "focus"],
+                        motivation: newRoastData.motivation
+                    };
+
+                    roasts.push(newRoastObject);
+                    showReaction("New roast protocol downloaded.", true);
+                    if(!gameActive && currentRoastIndex >= roasts.length -1) {
+                        startGame();
+                    }
+
+                } else {
+                    throw new Error("Invalid response structure from API.");
+                }
+
+            } catch (error) {
+                console.error("Failed to generate roast:", error);
+                showReaction("Overlords are busy. Try again later.", false);
+            } finally {
+                generateRoastBtn.disabled = false;
+                generateRoastText.textContent = 'Summon New Roast from A.I. Overlords';
+                generateRoastLoader.classList.add('hidden');
+            }
+        }
+
+        comebackForm.addEventListener('submit', handleTypedComeback);
+        restartBtn.addEventListener('click', startGame);
+        generateRoastBtn.addEventListener('click', generateNewRoast);
+
+        // Initial start
+        startGame();
+    </script>
+</body>
+</html>
